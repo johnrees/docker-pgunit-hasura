@@ -1,0 +1,38 @@
+version: "3.7"
+
+services:
+  postgres-with-pgunit:
+    restart: always
+    build:
+      context: ./postgres-with-pgunit
+      dockerfile: Dockerfile
+    ports:
+      - ${PG_PORT}:5432
+    volumes:
+      - data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${PG_DATABASE}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_USER: ${PG_USERNAME}
+
+  hasura:
+    image: hasura/graphql-engine:v1.3.0.cli-migrations-v2
+    restart: always
+    ports:
+      - ${HASURA_PORT}:8080
+    depends_on:
+      - postgres-with-pgunit
+    volumes:
+      - "${HASURA_GRAPHQL_METADATA_DIRECTORY}:/metadata"
+      - "${HASURA_GRAPHQL_MIGRATIONS_DIRECTORY}:/migrations"
+    environment:
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
+      HASURA_GRAPHQL_CORS_DOMAIN: "*"
+      HASURA_GRAPHQL_DATABASE_URL: postgres://${PG_USERNAME}:${PG_PASSWORD}@postgres-with-pgunit/${PG_DATABASE}
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_JWT_SECRET: '{ "type": "HS256", "key": "${JWT_SECRET}" }'
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "user"
+
+volumes:
+  data:
