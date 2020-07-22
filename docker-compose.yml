@@ -9,7 +9,7 @@ services:
     ports:
       - ${PG_PORT}:5432
     volumes:
-      - data:/var/lib/postgresql/data
+      - data2:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${PG_DATABASE}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
@@ -23,8 +23,8 @@ services:
     depends_on:
       - postgres-with-pgunit
     volumes:
-      - "${HASURA_GRAPHQL_METADATA_DIRECTORY}:/metadata"
-      - "${HASURA_GRAPHQL_MIGRATIONS_DIRECTORY}:/migrations"
+      - "./metadata:/metadata"
+      - "./migrations:/migrations"
     environment:
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
       HASURA_GRAPHQL_CORS_DOMAIN: "*"
@@ -35,4 +35,4 @@ services:
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "user"
 
 volumes:
-  data:
+  data2:
